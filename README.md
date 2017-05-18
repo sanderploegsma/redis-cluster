@@ -89,6 +89,12 @@ $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379 \
 27259a4ae75c616bbde2f8e8c6dfab2c173f2a1d
 ```
 
+Finally, we can rebalance the remaining masters to evenly distribute slots:
+```
+kubectl exec redis-cluster-0 -- redis-trib rebalance --use-empty-masters \
+$(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379
+```
+
 ### Scaling down
 After the master has been resharded and both nodes are removed from the cluster, it is safe to scale down the statefulset:
 ```
