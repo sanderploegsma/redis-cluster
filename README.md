@@ -100,3 +100,8 @@ After the master has been resharded and both nodes are removed from the cluster,
 ``` bash
 kubectl scale statefulset redis-cluster --replicas=6
 ```
+
+## Cleaning up
+``` bash
+kubectl delete pods,statefulset,svc,configmap,pvc -l app=redis-cluster
+```
