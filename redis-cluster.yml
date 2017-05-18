@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: redis-cluster-config
+  name: redis-cluster
 data:
   redis.conf: |+
     cluster-enabled yes
@@ -11,7 +11,6 @@ data:
     cluster-config-file /data/nodes.conf
     cluster-migration-barrier 1
     appendonly yes
-    # Other cluster members need to be able to connect
     protected-mode no
 ---
 apiVersion: v1
@@ -31,7 +30,6 @@ spec:
     targetPort: 16379
     name: gossip
   clusterIP: None
-  #type: ClusterIP
   selector:
     app: redis-cluster
 ---
@@ -59,8 +57,6 @@ spec:
           name: gossip
         command: ["redis-server"]
         args: ["/conf/redis.conf"]
-        # Ensure that Redis is online before initializing the next node.
-        # TODO: Test that the cluster node is init'd properly.
         readinessProbe:
           exec:
             command:
@@ -69,8 +65,6 @@ spec:
             - "redis-cli -h $(hostname) ping"
           initialDelaySeconds: 15
           timeoutSeconds: 5
-
-        # Mark a node as down if Redis server stops running
         livenessProbe:
           exec:
             command:
@@ -79,11 +73,6 @@ spec:
             - "redis-cli -h $(hostname) ping"
           initialDelaySeconds: 20
           periodSeconds: 3
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
         volumeMounts:
         - name: conf
           mountPath: /conf
@@ -92,10 +81,9 @@ spec:
           mountPath: /data
           readOnly: false
       volumes:
-      # Insert our pre-baked Redis configuration file into /conf/redis.conf
       - name: conf
         configMap:
-          name: redis-cluster-config
+          name: redis-cluster
           items: 
           - key: redis.conf
             path: redis.conf
