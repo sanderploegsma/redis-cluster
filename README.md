@@ -45,13 +45,13 @@ $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379
 Slaves can be deleted safely. First, let's get the id of the slave:
 
 ```
-$ k exec redis-cluster-7 -- redis-cli cluster nodes | grep myself
+$ kubectl exec redis-cluster-7 -- redis-cli cluster nodes | grep myself
 3f7cbc0a7e0720e37fcb63a81dc6e2bf738c3acf 172.17.0.11:6379 myself,slave 32f250e02451352e561919674b8b705aef4dbdc6 0 0 0 connected
 ```
 
 Then delete it:
 ```
-k exec redis-cluster-0 -- redis-trib del-node \
+kubectl exec redis-cluster-0 -- redis-trib del-node \
 $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379 \
 3f7cbc0a7e0720e37fcb63a81dc6e2bf738c3acf
 ```
@@ -61,13 +61,13 @@ To remove master nodes from the cluster, we first have to move the slots used by
 
 First, take note of the id of the master node we are removing:
 ```
-$ k exec redis-cluster-6 -- redis-cli cluster nodes | grep myself
+$ kubectl exec redis-cluster-6 -- redis-cli cluster nodes | grep myself
 27259a4ae75c616bbde2f8e8c6dfab2c173f2a1d 172.17.0.10:6379 myself,master - 0 0 9 connected 0-1364 5461-6826 10923-12287
 ```
 
 Also note the id of any other master node:
 ```
-$ k exec redis-cluster-6 -- redis-cli cluster nodes | grep master | grep -v myself
+$ kubectl exec redis-cluster-6 -- redis-cli cluster nodes | grep master | grep -v myself
 32f250e02451352e561919674b8b705aef4dbdc6 172.17.0.4:6379 master - 0 1495120400893 2 connected 6827-10922
 2a42aec405aca15ec94a2470eadf1fbdd18e56c9 172.17.0.6:6379 master - 0 1495120398342 8 connected 12288-16383
 0990136c9a9d2e48ac7b36cfadcd9dbe657b2a72 172.17.0.2:6379 master - 0 1495120401395 1 connected 1365-5460
@@ -75,7 +75,7 @@ $ k exec redis-cluster-6 -- redis-cli cluster nodes | grep master | grep -v myse
 
 Then, use the `redis-trib` `reshard` command to move all slots from `redis-cluster-6`:
 ```
-k exec redis-cluster-0 -- redis-trib reshard --yes \
+kubectl exec redis-cluster-0 -- redis-trib reshard --yes \
 --from 27259a4ae75c616bbde2f8e8c6dfab2c173f2a1d \
 --to 32f250e02451352e561919674b8b705aef4dbdc6 \
 --slots 16384 \
@@ -84,7 +84,7 @@ $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379
 
 After resharding, it is save to delete the `redis-cluster-6` master node:
 ```
-k exec redis-cluster-0 -- redis-trib del-node \
+kubectl exec redis-cluster-0 -- redis-trib del-node \
 $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379 \
 27259a4ae75c616bbde2f8e8c6dfab2c173f2a1d
 ```
@@ -92,5 +92,5 @@ $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379 \
 ### Scaling down
 After the master has been resharded and both nodes are removed from the cluster, it is safe to scale down the statefulset:
 ```
-k scale statefulset redis-cluster --replicas=6
+kubectl scale statefulset redis-cluster --replicas=6
 ```
