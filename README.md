@@ -88,3 +88,9 @@ k exec redis-cluster-0 -- redis-trib del-node \
 $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379 \
 27259a4ae75c616bbde2f8e8c6dfab2c173f2a1d
 ```
+
+### Scaling down
+After the master has been resharded and both nodes are removed from the cluster, it is safe to scale down the statefulset:
+```
+k scale statefulset redis-cluster --replicas=6
+```
