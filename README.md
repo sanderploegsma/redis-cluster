@@ -1,5 +1,7 @@
 # Redis cluster
-A [redis cluster](https://redis.io/topics/cluster-tutorial) running in Kubernetes
+A [redis cluster](https://redis.io/topics/cluster-tutorial) running in Kubernetes. The docker image embeds the `redis-trib.rb` used in the tutorial as a `redis-trib` binary in the container's PATH for convenience.
+
+If the cluster configuration of a redis node is lost in some way, it will come back with a different ID, which upsets the balance in the cluster (and probably in the Force). To prevent this, the setup uses a combination of Kubernetes StatefulSets and PersistentVolumeClaims to make sure the state of the cluster is maintained after rescheduling or failures.
 
 ## Setup (using minikube)
 1. `minikube start`
