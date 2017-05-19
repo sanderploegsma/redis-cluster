@@ -65,7 +65,7 @@ spec:
             - sh
             - -c
             - "redis-cli -h $(hostname) ping"
-          initialDelaySeconds: 15
+          initialDelaySeconds: 5
           timeoutSeconds: 5
         livenessProbe:
           exec:
@@ -73,7 +73,7 @@ spec:
             - sh
             - -c
             - "redis-cli -h $(hostname) ping"
-          initialDelaySeconds: 20
+          initialDelaySeconds: 10
           periodSeconds: 3
         volumeMounts:
         - name: conf
