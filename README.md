@@ -7,7 +7,7 @@ If the cluster configuration of a redis node is lost in some way, it will come b
 1. `minikube start`
 2. `eval $(minikube docker-env)`
 3. `docker build -t redis-cluster:v1 .`
-4. `kubectl create -f redis-cluster.yml`
+4. `kubectl apply -f redis-cluster.yml`
 
 This will spin up 6 `redis-cluster` pods one by one, which may take a while. After all pods are in a running state, you can itialize the cluster using the `redis-trib` command in any of the pods. After the initialization, you will end up with 3 master and 3 slave nodes.
 ``` bash
@@ -84,7 +84,7 @@ kubectl exec redis-cluster-0 -- redis-trib reshard --yes \
 $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379
 ```
 
-After resharding, it is save to delete the `redis-cluster-6` master node:
+After resharding, it is safe to delete the `redis-cluster-6` master node:
 ``` bash
 kubectl exec redis-cluster-0 -- redis-trib del-node \
 $(kubectl get pod redis-cluster-0 -o jsonpath='{.status.podIP}'):6379 \
