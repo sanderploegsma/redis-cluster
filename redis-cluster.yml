@@ -6,6 +6,18 @@ metadata:
   labels:
     app: redis-cluster
 data:
+  fix-ip.sh: |
+    #!/bin/sh
+    CLUSTER_CONFIG="/data/nodes.conf"
+    if [ -f ${CLUSTER_CONFIG} ]; then
+      if [ -z "${POD_IP}" ]; then 
+        echo "Unable to determine Pod IP address!"
+        exit 1
+      fi
+      echo "Updating my IP to ${POD_IP} in ${CLUSTER_CONFIG}"
+      sed -i.bak -e '/myself/ s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/${POD_IP}/' ${CLUSTER_CONFIG}
+    fi
+    exec "$@"
   redis.conf: |+
     cluster-enabled yes
     cluster-require-full-coverage no
@@ -58,8 +70,7 @@ spec:
           name: client
         - containerPort: 16379
           name: gossip
-        command: ["redis-server"]
-        args: ["/conf/redis.conf"]
+        command: ["/conf/fix-ip.sh", "redis-server", "/conf/redis.conf"]
         readinessProbe:
           exec:
             command:
@@ -76,6 +87,11 @@ spec:
             - "redis-cli -h $(hostname) ping"
           initialDelaySeconds: 20
           periodSeconds: 3
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
         volumeMounts:
         - name: conf
           mountPath: /conf
@@ -87,9 +103,7 @@ spec:
       - name: conf
         configMap:
           name: redis-cluster
-          items: 
-          - key: redis.conf
-            path: redis.conf
+          defaultMode: 0755
   volumeClaimTemplates:
   - metadata:
       name: data
