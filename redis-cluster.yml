@@ -15,7 +15,7 @@ data:
         exit 1
       fi
       echo "Updating my IP to ${POD_IP} in ${CLUSTER_CONFIG}"
-      sed -i.bak -e '/myself/ s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/${POD_IP}/' ${CLUSTER_CONFIG}
+      sed -i.bak -e "/myself/ s/[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}/${POD_IP}/" ${CLUSTER_CONFIG}
     fi
     exec "$@"
   redis.conf: |+
