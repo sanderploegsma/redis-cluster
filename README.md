@@ -1,6 +1,8 @@
 # Redis cluster
 A [redis cluster](https://redis.io/topics/cluster-tutorial) running in Kubernetes.
 
+:warning: **Note: this repository is no longer actively maintained. While it served as a nice example to run Redis Cluster in Kubernetes when I wrote it, there are currently more stable solutions to spin up a cluster. I recommend looking at community-built Kubernetes Operators for Redis, or an actively maintained Helm chart.**
+
 If the cluster configuration of a redis node is lost in some way, it will come back with a different ID, which upsets the balance in the cluster (and probably in the Force). To prevent this, the setup uses a combination of Kubernetes StatefulSets and PersistentVolumeClaims to make sure the state of the cluster is maintained after rescheduling or failures.
 
 ## Setup
